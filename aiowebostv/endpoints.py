@@ -59,3 +59,5 @@ LUNA_SET_CONFIGS = "com.webos.service.config/setConfigs"
 LUNA_SET_SYSTEM_SETTINGS = "com.webos.settingsservice/setSystemSettings"
 LUNA_TURN_ON_SCREEN_SAVER = "com.webos.service.tvpower/power/turnOnScreenSaver"
 LUNA_SHOW_INPUT_PICKER = "com.webos.surfacemanager/showInputPicker"
+LUNA_HOMEBREW_EXEC = "org.webosbrew.hbchannel.service/exec"
+LUNA_ENDPOINTS = [LUNA_SET_CONFIGS, LUNA_SET_SYSTEM_SETTINGS, LUNA_SHOW_INPUT_PICKER, LUNA_HOMEBREW_EXEC]
