@@ -583,7 +583,7 @@ class WebOsClient:
         message = {
             "id": uid,
             "type": request_type,
-            "uri": f"luna://{url}" if url in ep.LUNA_ENDPOINTS else f"ssap://{uri}",
+            "uri": f"ssap://{uri}",
             "payload": payload,
         }
 
