@@ -997,6 +997,6 @@ class WebOsClient:
         ret = await self.request(ep.CREATE_ALERT, payload)
         alertId = ret.get("alertId")
         if alertId is None:
-            raise PyLGTVCmdException("Invalid alertId")
+            raise WebOsTvCommandError(f"Invalid alertId {alertId}")
 
         return await self.request(ep.CLOSE_ALERT, payload={"alertId": alertId})
