@@ -60,6 +60,7 @@ class WebOsClient:
         self._software_info = None
         self._hello_info = None
         self._sound_output = None
+        self._picture_settings = None
         self.state_update_callbacks = []
         self.do_state_update = False
         self._volume_step_lock = asyncio.Lock()
@@ -264,7 +265,7 @@ class WebOsClient:
             self._software_info = None
             self._hello_info = None
             self._sound_output = None
-
+            self._picture_settings = None
             for callback in self.state_update_callbacks:
                 closeout.add(callback(self))
 
@@ -402,6 +403,11 @@ class WebOsClient:
     def sound_output(self):
         """Return TV sound output."""
         return self._sound_output
+
+    @property
+    def picture_settings(self):
+        """Return TV picture settings."""
+        return self._picture_settings
 
     @property
     def is_on(self):
@@ -568,6 +574,14 @@ class WebOsClient:
 
         if self.state_update_callbacks and self.do_state_update:
             await self.do_state_update_callbacks()
+
+    async def set_picture_settings_state(self, picture_settings):
+        """Set TV picture settings state callback."""
+        self._picture_settings = picture_settings
+
+        if self.state_update_callbacks and self.do_state_update:
+            await self.do_state_update_callbacks()
+
 
     # low level request handling
 
