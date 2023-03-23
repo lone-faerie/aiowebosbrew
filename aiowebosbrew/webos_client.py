@@ -45,6 +45,7 @@ class WebOsClient:
         self.connect_result = None
         self.connection = None
         self.input_connection = None
+        self.ssh_connection = None
         self.callbacks = {}
         self.futures = {}
         self._power_state = {}
