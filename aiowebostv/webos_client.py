@@ -972,3 +972,31 @@ class WebOsClient:
     async def fast_forward(self):
         """Fast Forward media."""
         return await self.request(ep.MEDIA_FAST_FORWARD)
+
+    async def luna_request(self, uri, params):
+        """luna api call."""
+        # n.b. this is a hack which abuses the alert API
+        # to call the internal luna API which is otherwise
+        # not exposed through the websocket interface
+        # An important limitation is that any returned
+        # data is not accessible
+
+        # set desired action for click, fail and close
+        # for redundancy/robustness
+
+        lunauri = f"luna://{uri}"
+
+        buttons = [{"label": "", "onClick": lunauri, "params": params}]
+        payload = {
+            "message": " ",
+            "buttons": buttons,
+            "onclose": {"uri": lunauri, "params": params},
+            "onfail": {"uri": lunauri, "params": params},
+        }
+
+        ret = await self.request(ep.CREATE_ALERT, payload)
+        alertId = ret.get("alertId")
+        if alertId is None:
+            raise PyLGTVCmdException("Invalid alertId")
+
+        return await self.request(ep.CLOSE_ALERT, payload={"alertId": alertId})
