@@ -1,4 +1,4 @@
-"""Setup module for aiowebostv."""
+"""Setup module for aiowebosbrew."""
 from pathlib import Path
 
 from setuptools import setup
@@ -9,7 +9,7 @@ VERSION = "0.3.2"
 
 
 setup(
-    name="aiowebostv",
+    name="aiowebosbrew",
     version=VERSION,
     url="https://github.com/home-assistant-libs/aiowebostv",
     download_url="https://github.com/home-assistant-libs/aiowebostv",
@@ -18,7 +18,7 @@ setup(
     description="Library to control webOS based LG TV devices",
     long_description=README_FILE.read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
-    packages=["aiowebostv"],
+    packages=["aiowebosbrew"],
     python_requires=">=3.9",
     install_requires=["websockets>=10.3"],
     include_package_data=True,
