@@ -206,6 +206,7 @@ class WebOsClient:
                 self.subscribe_apps(self.set_apps_state),
                 self.subscribe_inputs(self.set_inputs_state),
                 self.subscribe_sound_output(self.set_sound_output_state),
+                self.subscribe_picture_settings(self.set_picture_settings_state),
             }
             subscribe_tasks = set()
             for state_update in subscribe_state_updates:
