@@ -1015,16 +1015,12 @@ class WebOsClient:
 
         return await self.request(ep.CLOSE_ALERT, payload={"alertId": alertId})
 
-    async def get_picture_settings(
-        self, keys=["contrast", "backlight", "brightness", "color"]
-    ):
+    async def get_picture_settings(self, keys=["contrast", "backlight", "brightness", "color"]):
         payload = {"category": "picture", "keys": keys}
         ret = await self.request(ep.GET_SYSTEM_SETTINGS, payload=payload)
         return ret["settings"]
 
-    async def subscribe_picture_settings(
-        self, callback, keys=["contrast", "backlight", "brightness", "color"]
-    ):
+    async def subscribe_picture_settings(self, callback, keys=["contrast", "backlight", "brightness", "color"]):
         async def settings(payload):
             await callback(payload.get("settings"))
 
