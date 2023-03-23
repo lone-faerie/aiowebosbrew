@@ -4,6 +4,7 @@ Python library to control LG webOS based TV devices.
 Based on:
 - `aiopylgtv` library at https://github.com/bendavid/aiopylgtv
 - `bscpylgtv` library at https://github.com/chros73/bscpylgtv
+- `aiowebostv` library at https://github.com/home-assistant-libs/aiowebostv
 
 ## Requirements
 - Python >= 3.9
