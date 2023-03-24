@@ -123,7 +123,7 @@ class WebOsClient:
         )
 
     def _ssh_keygen(self, filename):
-        """Generate new SSH key pair."""
+        """Generate new SSH key pair."
         _LOGGER.warning("ssh keygen(%s): path: %s", self.host, filename)
         key = asyncssh.generate_private_key("ssh-rsa")
         key.write_private_key(filename, format_name="pkcs1-pem")
