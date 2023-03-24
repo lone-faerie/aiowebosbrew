@@ -71,11 +71,11 @@ class WebOsClient:
 
         # needed for ssh luna commands
         self.ssh_key_path = ssh_key
-        self._ssh_key = None
+        self.ssh_key = None
         self.known_hosts_path = known_hosts
-        self._known_hosts = None
-        self.ssh_connection = None
-        self._consumer_queue = asyncio.Queue()
+        self.known_hosts = None
+        self.luna_connection = None
+        self.consumer_queue = asyncio.Queue()
 
     async def connect(self):
         """Connect to webOS TV device."""
@@ -143,8 +143,9 @@ class WebOsClient:
         main_ws = None
         input_ws = None
         ssl_context = None
-        ssh_connection = None
+        ssh = None
         ssh_key = None
+        known_hosts = None
         try:
             try:
                 uri = f"ws://{self.host}:{WS_PORT}"
@@ -230,6 +231,8 @@ class WebOsClient:
                     ssh_key = await asyncssh.read_private_key(self.ssh_key_path)
                 except (FileNotFoundError, asyncssh.KeyImportError):
                     ssh_key = await self._ssh_keygen(self.ssh_key_path)
+            
+            ssh = await self._ssh_connect(ssh_key, known_hosts)
 
             # set static state and subscribe to state updates
             # avoid partial updates during initial subscription
