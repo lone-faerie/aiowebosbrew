@@ -224,7 +224,7 @@ class WebOsClient:
             # connection not maintained since each command is it's own process
             def ssh_files(ssh_key, known_hosts=""):
                 key = None
-                generate_key = False
+                key_generated = False
                 hosts = None
                 if known_hosts:
                     hosts = asyncssh.read_known_hosts(known_hosts)
@@ -235,11 +235,8 @@ class WebOsClient:
                     key.write_private_key(filename, format_name="pkcs1-pem")
                     pub = key.convert_to_public()
                     pub.write_public_key(f"{filename}.pub", format_name="pkcs1-pem")
-                    generate_key = True
-                return key, hosts, generate_key
-            key_exists = os.path.isfile(self.ssh_key_path)
-            if not key_exists:
-                _LOGGER.warning("ssh keygen(%s): private: %s, public: %s.pub", self.host, self.ssh_key_path, self.ssh_key_path)
+                    key_generated = True
+                return key, hosts, key_generated
             ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
             
             ssh = await self._ssh_connect(ssh_key, known_hosts)
