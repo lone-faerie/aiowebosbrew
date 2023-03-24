@@ -41,7 +41,6 @@ class WebOsClient:
         self.timeout_connect = timeout_connect
         self.ping_interval = ping_interval
         self.ping_timeout = ping_timeout
-        self.ssh_key = ssh_key
         self.connect_task = None
         self.connect_result = None
         self.connection = None
@@ -67,6 +66,9 @@ class WebOsClient:
         self._volume_step_lock = asyncio.Lock()
         self._volume_step_delay = None
         self._loop = asyncio.get_running_loop()
+
+        """Initialize custom client."""
+        self.ssh_key = ssh_key
 
     async def connect(self):
         """Connect to webOS TV device."""
@@ -191,6 +193,11 @@ class WebOsClient:
 
             handler_tasks.add(asyncio.create_task(input_ws.wait_closed()))
             self.input_connection = input_ws
+
+            # test ssh connection needed to send luna commands
+            # also ensures root access
+            # connection not maintained since each command is it's own process
+            
 
             # set static state and subscribe to state updates
             # avoid partial updates during initial subscription
@@ -997,7 +1004,8 @@ class WebOsClient:
         if payload is None:
             payload = {}
 
-
+        cmd = ['luna-send', '-n', '1', uri, json.dumps(payload)]
+        return await asyncio.create_subprocess_shell()
 
     async def luna_request(self, uri, params):
         """luna api call."""
