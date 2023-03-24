@@ -34,7 +34,7 @@ class WebOsClient:
     """webOS TV client class."""
 
     def __init__(
-        self, host, client_key=None, timeout_connect=2, ping_interval=5, ping_timeout=20, ssh_key=None
+        self, host, client_key=None, timeout_connect=2, ping_interval=5, ping_timeout=20, ssh_key_path=None
     ):
         """Initialize the client."""
         self.host = host
@@ -70,9 +70,10 @@ class WebOsClient:
         self._loop = asyncio.get_running_loop()
 
         # needed for ssh luna commands
-        self.ssh_key = ssh_key
+        self.ssh_key_path = ssh_key_path
+        self.ssh_key = None
         self.ssh_connection = None
-        self._consumer_queue = None
+        self._consumer_queue = asyncio.Queue()
 
     async def connect(self):
         """Connect to webOS TV device."""
@@ -118,6 +119,10 @@ class WebOsClient:
             max_size=None,
             ssl=ssl_context,
         )
+
+    async def _ssh_keygen(self, filename):
+        """Generate new SSH key pair.""""
+        _LOGGER.debug("ssh keygen(%s): path: %s", self.host, filename)
 
     async def _ssh_connect(self, ssh_key, port=()):
         """Create SSH connection."""
@@ -206,10 +211,11 @@ class WebOsClient:
             handler_tasks.add(asyncio.create_task(input_ws.wait_closed()))
             self.input_connection = input_ws
 
-            # test ssh connection needed to send luna commands
+            # open ssh connection needed to send luna commands
             # also ensures root access
             # connection not maintained since each command is it's own process
-            
+            if self.ssh_key_path:
+                key = await asyncssh.read_private_key(self.ssh_key_path)
 
             # set static state and subscribe to state updates
             # avoid partial updates during initial subscription
