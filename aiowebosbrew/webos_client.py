@@ -122,16 +122,6 @@ class WebOsClient:
             ssl=ssl_context,
         )
 
-    def _ssh_keygen(self, filename):
-        """Generate new SSH key pair."""
-        _LOGGER.warning("ssh keygen(%s): generating: %s", self.host, filename)
-        key = asyncssh.generate_private_key("ssh-rsa")
-        key.write_private_key(filename, format_name="pkcs1-pem")
-        pub = key.convert_to_public()
-        pub.write_public_key(f"{filename}.pub", format_name="pkcs1-pem")
-        _LOGGER.warning("ssh keygen(%s): public key: %s.pub", self.host, filename)
-        return key
-
     async def _ssh_connect(self, ssh_key, known_hosts, port=()):
         """Create SSH connection."""
         _LOGGER.debug("ssh connect(%s): port: %d", self.host, port if port else 22)
@@ -232,16 +222,21 @@ class WebOsClient:
             # open ssh connection needed to send luna commands
             # also ensures root access
             # connection not maintained since each command is it's own process
-            def get_ssh_files(ssh_key, known_hosts=""):
+            def ssh_files(ssh_key, known_hosts=""):
                 key = None
                 hosts = None
+                if known_hosts:
+                    hosts = asyncssh.read_known_hosts(known_hosts)
                 if os.path.isfile(ssh_key):
                     key = asyncssh.read_private_key(ssh_key)
                 else:
-                    key = self._ssh_keygen(ssh_key)
-                if known_hosts:
-                    hosts = asyncssh.read_known_hosts(known_hosts)
+                    key = asyncssh.generate_private_key("ssh-rsa")
+                    key.write_private_key(filename, format_name="pkcs1-pem")
+                    pub = key.convert_to_public()
+                    pub.write_public_key(f"{filename}.pub", format_name="pkcs1-pem")
                 return key, hosts
+
+            ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
             
             ssh = await self._ssh_connect(ssh_key, known_hosts)
 
