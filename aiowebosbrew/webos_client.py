@@ -127,7 +127,9 @@ class WebOsClient:
         _LOGGER.warning("ssh keygen(%s): path: %s", self.host, filename)
         key = asyncssh.generate_private_key("ssh-rsa")
         key.write_private_key(filename, format_name="pkcs1-pem")
-        key.write_public_key(f"{filename}.pub", format_name="pkcs1-pem")
+        pub = key.convert_to_public()
+        pub.write_public_key(f"{filename}.pub", format_name="pkcs1-pem")
+        _LOGGER.warning("ssh keygen(%s): public key: %s.pub", self.host, filename)
         return key
 
     async def _ssh_connect(self, ssh_key, known_hosts, port=()):
