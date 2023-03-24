@@ -11,6 +11,8 @@ from datetime import timedelta
 import websockets
 from websockets.client import connect as ws_connect
 
+import asyncssh
+
 from . import endpoints as ep
 from .exceptions import (
     WebOsTvCommandError,
@@ -69,7 +71,7 @@ class WebOsClient:
 
         # needed for ssh luna commands
         self.ssh_key = ssh_key
-        self.ssh_connections = {}
+        self.ssh_connection = None
         self._consumer_queue = None
 
     async def connect(self):
@@ -106,7 +108,7 @@ class WebOsClient:
 
     async def _ws_connect(self, uri, ssl_context):
         """Create websocket connection."""
-        _LOGGER.debug("connect(%s): uri: %s", self.host, uri)
+        _LOGGER.debug("ws connect(%s): uri: %s", self.host, uri)
         return await ws_connect(
             uri,
             ping_interval=self.ping_interval,
@@ -116,6 +118,11 @@ class WebOsClient:
             max_size=None,
             ssl=ssl_context,
         )
+
+    async def _ssh_connect(self, ssh_key, port=()):
+        """Create SSH connection."""
+        _LOGGER.debug("ssh connect(%s): port: %d", self.host, port if port else 22)
+        return await asyncssh.connect(self.host, port, options={})
 
     async def connect_handler(self, res):
         """Handle connection for webOS TV."""
