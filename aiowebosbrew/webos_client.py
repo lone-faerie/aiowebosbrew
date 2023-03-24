@@ -233,10 +233,7 @@ class WebOsClient:
                 ssh_key = await self._ssh_keygen(DEFAULT_SSH_KEY)
 
             if self.know_hosts_path is not None:
-                try:
-                    known_hosts = await asyncssh.read_known_hosts(self.known_hosts_path)
-                except FileNotFoundError:
-                    pass
+                known_hosts = await asyncssh.read_known_hosts(self.known_hosts_path)
             
             ssh = await self._ssh_connect(ssh_key, known_hosts)
 
