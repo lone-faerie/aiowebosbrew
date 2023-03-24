@@ -32,7 +32,7 @@ class WebOsClient:
     """webOS TV client class."""
 
     def __init__(
-        self, host, client_key=None, timeout_connect=2, ping_interval=5, ping_timeout=20
+        self, host, client_key=None, timeout_connect=2, ping_interval=5, ping_timeout=20, ssh_key=None
     ):
         """Initialize the client."""
         self.host = host
@@ -41,6 +41,7 @@ class WebOsClient:
         self.timeout_connect = timeout_connect
         self.ping_interval = ping_interval
         self.ping_timeout = ping_timeout
+        self.ssh_key = ssh_key
         self.connect_task = None
         self.connect_result = None
         self.connection = None
