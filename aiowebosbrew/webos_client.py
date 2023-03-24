@@ -34,7 +34,7 @@ class WebOsClient:
     """webOS TV client class."""
 
     def __init__(
-        self, host, client_key=None, timeout_connect=2, ping_interval=5, ping_timeout=20, ssh_key="", known_hosts=""
+        self, host, ssh_key, known_hosts="", client_key=None, timeout_connect=2, ping_interval=5, ping_timeout=20
     ):
         """Initialize the client."""
         self.host = host
@@ -122,7 +122,7 @@ class WebOsClient:
             ssl=ssl_context,
         )
 
-    async def _ssh_keygen(self, filename):
+    def _ssh_keygen(self, filename):
         """Generate new SSH key pair."""
         _LOGGER.warning("ssh keygen(%s): path: %s", self.host, filename)
         key = asyncssh.generate_private_key("ssh-rsa")
@@ -232,14 +232,16 @@ class WebOsClient:
             # open ssh connection needed to send luna commands
             # also ensures root access
             # connection not maintained since each command is it's own process
-            async def get_ssh_key(filename, res):
-                if self.ssh_key_path and os.path.isfile(self.ssh_key_path):
-                    ssh_key = asyncssh.read_private_key(self.ssh_key_path)
+            def get_ssh_files(ssh_key, known_hosts=""):
+                key = None
+                hosts = None
+                if os.path.isfile(ssh_key):
+                    key = asyncssh.read_private_key(ssh_key)
                 else:
-                    ssh_key = self._ssh_keygen(DEFAULT_SSH_KEY)
-
-            if self.know_hosts_path:
-                known_hosts = await asyncssh.read_known_hosts(self.known_hosts_path)
+                    key = self._ssh_keygen(ssh_key)
+                if known_hosts:
+                    hosts = asyncssh.read_known_hosts(known_hosts)
+                return key, hosts
             
             ssh = await self._ssh_connect(ssh_key, known_hosts)
 
