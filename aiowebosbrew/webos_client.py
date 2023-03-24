@@ -122,7 +122,7 @@ class WebOsClient:
     async def _ssh_connect(self, ssh_key, port=()):
         """Create SSH connection."""
         _LOGGER.debug("ssh connect(%s): port: %d", self.host, port if port else 22)
-        return await asyncssh.connect(self.host, port, options={})
+        return await asyncssh.connect(self.host, port, options={'known_hosts': None, 'client_keys': [ssh_key]})
 
     async def connect_handler(self, res):
         """Handle connection for webOS TV."""
