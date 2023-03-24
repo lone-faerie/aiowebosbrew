@@ -69,7 +69,8 @@ class WebOsClient:
 
         # needed for ssh luna commands
         self.ssh_key = ssh_key
-        self.luna_queue = 
+        self.ssh_connections = {}
+        self._consumer_queue = None
 
     async def connect(self):
         """Connect to webOS TV device."""
@@ -177,6 +178,9 @@ class WebOsClient:
 
             self.callbacks = {}
             self.futures = {}
+
+            if self._consumer_queue is None:
+                self._consumer_queue = asyncio.Queue()
 
             handler_tasks.add(
                 asyncio.create_task(
@@ -300,6 +304,14 @@ class WebOsClient:
                     future.set_result(msg)
         except asyncio.CancelledError:
             pass
+
+    async def _ws_consumer(self, web_socket):
+        """Consume websocket messages."""
+        try:
+            async for raw_msg in web_socket:
+                _LOGGER.debug("ws recv(%s): %s", self.host, raw_msg)
+                msg = json.loads(raw_msg)
+                self._consumer_queue.put_nowait(msg)
 
     async def consumer_handler(self, web_socket, callbacks, futures):
         """Callbacks consumer handler."""
