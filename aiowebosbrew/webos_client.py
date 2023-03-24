@@ -136,6 +136,8 @@ class WebOsClient:
         main_ws = None
         input_ws = None
         ssl_context = None
+        ssh_connection = None
+        ssh_key = None
         try:
             try:
                 uri = f"ws://{self.host}:{WS_PORT}"
@@ -214,8 +216,13 @@ class WebOsClient:
             # open ssh connection needed to send luna commands
             # also ensures root access
             # connection not maintained since each command is it's own process
-            if self.ssh_key_path:
-                key = await asyncssh.read_private_key(self.ssh_key_path)
+            if self.ssh_key_path is None:
+                ssh_key = await self._ssh_keygen(DEFAULT_SSH_KEY)
+            else:
+                try:
+                    ssh_key = await asyncssh.read_private_key(self.ssh_key_path)
+                except (FileNotFoundError, asyncssh.KeyImportError):
+                    ssh_key = await self._ssh_keygen(self.ssh_key_path)
 
             # set static state and subscribe to state updates
             # avoid partial updates during initial subscription
