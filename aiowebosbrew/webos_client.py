@@ -34,7 +34,7 @@ class WebOsClient:
     """webOS TV client class."""
 
     def __init__(
-        self, host, client_key=None, timeout_connect=2, ping_interval=5, ping_timeout=20, ssh_key=None, known_hosts=None
+        self, host, client_key=None, timeout_connect=2, ping_interval=5, ping_timeout=20, ssh_key="", known_hosts=""
     ):
         """Initialize the client."""
         self.host = host
@@ -123,7 +123,7 @@ class WebOsClient:
         )
 
     async def _ssh_keygen(self, filename):
-        """Generate new SSH key pair.""""
+        """Generate new SSH key pair."""
         _LOGGER.debug("ssh keygen(%s): path: %s", self.host, filename)
 
     async def _ssh_connect(self, ssh_key, known_hosts, port=()):
@@ -224,7 +224,7 @@ class WebOsClient:
             # open ssh connection needed to send luna commands
             # also ensures root access
             # connection not maintained since each command is it's own process
-            if self.ssh_key_path is not None:
+            if self.ssh_key_path:
                 try:
                     ssh_key = await asyncssh.read_private_key(self.ssh_key_path)
                 except (FileNotFoundError, asyncssh.KeyImportError):
@@ -232,7 +232,7 @@ class WebOsClient:
             else:
                 ssh_key = await self._ssh_keygen(DEFAULT_SSH_KEY)
 
-            if self.know_hosts_path is not None:
+            if self.know_hosts_path:
                 known_hosts = await asyncssh.read_known_hosts(self.known_hosts_path)
             
             ssh = await self._ssh_connect(ssh_key, known_hosts)
