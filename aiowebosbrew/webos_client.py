@@ -223,20 +223,19 @@ class WebOsClient:
             # also ensures root access
             # connection not maintained since each command is it's own process
             def ssh_files(ssh_key, known_hosts=""):
-                key = None
-                key_generated = False
                 hosts = None
+                key = None
+                pub_key = None
                 if known_hosts:
                     hosts = asyncssh.read_known_hosts(known_hosts)
                 if os.path.isfile(ssh_key):
                     key = asyncssh.read_private_key(ssh_key)
                 else:
                     key = asyncssh.generate_private_key("ssh-rsa")
-                    key.write_private_key(filename, format_name="pkcs1-pem")
-                    pub = key.convert_to_public()
-                    pub.write_public_key(f"{filename}.pub", format_name="pkcs1-pem")
-                    key_generated = True
-                return key, hosts, key_generated
+                    key.write_private_key(ssh_key, format_name="pkcs1-pem")
+                    pub_key = key.convert_to_public()
+                    pub.write_public_key(f"{ssh_key}.pub, format_name="pkcs1-pem")
+                return hosts, key, pub_key
             ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
             
             ssh = await self._ssh_connect(ssh_key, known_hosts)
