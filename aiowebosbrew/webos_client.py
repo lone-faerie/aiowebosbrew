@@ -224,13 +224,19 @@ class WebOsClient:
             # open ssh connection needed to send luna commands
             # also ensures root access
             # connection not maintained since each command is it's own process
-            if self.ssh_key_path is None:
-                ssh_key = await self._ssh_keygen(DEFAULT_SSH_KEY)
-            else:
+            if self.ssh_key_path is not None:
                 try:
                     ssh_key = await asyncssh.read_private_key(self.ssh_key_path)
                 except (FileNotFoundError, asyncssh.KeyImportError):
                     ssh_key = await self._ssh_keygen(self.ssh_key_path)
+            else:
+                ssh_key = await self._ssh_keygen(DEFAULT_SSH_KEY)
+
+            if self.know_hosts_path is not None:
+                try:
+                    known_hosts = await asyncssh.read_known_hosts(self.known_hosts_path)
+                except FileNotFoundError:
+                    pass
             
             ssh = await self._ssh_connect(ssh_key, known_hosts)
 
