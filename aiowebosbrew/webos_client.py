@@ -45,7 +45,6 @@ class WebOsClient:
         self.connect_result = None
         self.connection = None
         self.input_connection = None
-        self.ssh_connection = None
         self.callbacks = {}
         self.futures = {}
         self._power_state = {}
@@ -988,6 +987,16 @@ class WebOsClient:
     async def fast_forward(self):
         """Fast Forward media."""
         return await self.request(ep.MEDIA_FAST_FORWARD)
+
+    async def luna_command(self, request_type, uri, payload=None, uid=None):
+        if uid is None:
+            uid = self.command_count
+            self.command_count += 1
+
+        if payload is None:
+            payload = {}
+
+
 
     async def luna_request(self, uri, params):
         """luna api call."""
