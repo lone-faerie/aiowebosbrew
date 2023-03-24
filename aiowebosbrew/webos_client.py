@@ -124,7 +124,7 @@ class WebOsClient:
 
     async def _ssh_keygen(self, filename):
         """Generate new SSH key pair."""
-        _LOGGER.debug("ssh keygen(%s): path: %s", self.host, filename)
+        _LOGGER.warning("ssh keygen(%s): path: %s", self.host, filename)
 
     async def _ssh_connect(self, ssh_key, known_hosts, port=()):
         """Create SSH connection."""
