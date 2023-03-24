@@ -67,8 +67,9 @@ class WebOsClient:
         self._volume_step_delay = None
         self._loop = asyncio.get_running_loop()
 
-        """Initialize custom client."""
+        # needed for ssh luna commands
         self.ssh_key = ssh_key
+        self.luna_queue = 
 
     async def connect(self):
         """Connect to webOS TV device."""
