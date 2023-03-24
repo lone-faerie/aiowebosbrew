@@ -312,6 +312,17 @@ class WebOsClient:
                 _LOGGER.debug("ws recv(%s): %s", self.host, raw_msg)
                 msg = json.loads(raw_msg)
                 self._consumer_queue.put_nowait(msg)
+        except asyncio.CancelledError:
+            pass
+
+    async def _ssh_consumer(self, process):
+        """Consume ssh luna messages"""
+        try:
+            for line in iter(process.stdout.readline, b""):
+                msg = json.loads(line)
+                self._consumer_queue.put_nowait(msg)
+        except asyncio.CancelledError:
+            pass
 
     async def consumer_handler(self, web_socket, callbacks, futures):
         """Callbacks consumer handler."""
