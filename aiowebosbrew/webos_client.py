@@ -129,14 +129,13 @@ class WebOsClient:
     async def _ssh_connect(self, ssh_key, known_hosts, port=()):
         """Create SSH connection."""
         _LOGGER.debug("ssh connect(%s): port: %d", self.host, port if port else 22)
-        keepalive_count = (self.ping_timeout / self.ping_interval) if (self.ping_timeout > (3 * self.ping_interval)) else 3
         return await asyncssh.connect(
             self.host,
             port,
             known_hosts=known_hosts,
             client_keys=[ssh_key],
             keepalive_interval=self.ping_interval,
-            keepalive_max_count = keepalive_count,
+            keepalive_max_count = (self.ping_timeout // self.ping_interval) if (self.ping_timeout > (3 * self.ping_interval)) else 3,
         )
 
     async def connect_handler(self, res):
