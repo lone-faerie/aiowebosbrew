@@ -125,6 +125,10 @@ class WebOsClient:
     async def _ssh_keygen(self, filename):
         """Generate new SSH key pair."""
         _LOGGER.warning("ssh keygen(%s): path: %s", self.host, filename)
+        key = asyncssh.generate_private_key("ssh-rsa")
+        key.write_private_key(filename, format_name="pkcs1-pem")
+        key.write_public_key(f"{filename}.pub", format_name="pkcs1-pem")
+        return key
 
     async def _ssh_connect(self, ssh_key, known_hosts, port=()):
         """Create SSH connection."""
@@ -226,13 +230,11 @@ class WebOsClient:
             # open ssh connection needed to send luna commands
             # also ensures root access
             # connection not maintained since each command is it's own process
-            if self.ssh_key_path:
-                try:
-                    ssh_key = await asyncssh.read_private_key(self.ssh_key_path)
-                except (FileNotFoundError, asyncssh.KeyImportError):
-                    ssh_key = await self._ssh_keygen(self.ssh_key_path)
-            else:
-                ssh_key = await self._ssh_keygen(DEFAULT_SSH_KEY)
+            async def get_ssh_key(filename, res):
+                if self.ssh_key_path and os.path.isfile(self.ssh_key_path):
+                    ssh_key = asyncssh.read_private_key(self.ssh_key_path)
+                else:
+                    ssh_key = self._ssh_keygen(DEFAULT_SSH_KEY)
 
             if self.know_hosts_path:
                 known_hosts = await asyncssh.read_known_hosts(self.known_hosts_path)
