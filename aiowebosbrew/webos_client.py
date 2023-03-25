@@ -236,11 +236,13 @@ class WebOsClient:
                     key = asyncssh.generate_private_key("ssh-rsa")
                     key.write_private_key(ssh_key, format_name="pkcs1-pem")
                     pub_key = key.convert_to_public()
-                    pub.write_public_key(f"{ssh_key}.pub, format_name="pkcs1-pem")
+                    pub.write_public_key(f"{ssh_key}.pub", format_name="pkcs1-pem")
 
                 return hosts, key, pub_key
             ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
-            
+            known_hosts, ssh_key, pub_key = await ssh_future
+            if pub_key is not None:
+                _LOGGER.warning("ssh keygen(%s): generated private: %s, public: %s.pub", self.host, self.ssh_key_name, self.ssh_key_name)
             ssh = await self._ssh_connect(ssh_key, known_hosts)
 
             # set static state and subscribe to state updates
