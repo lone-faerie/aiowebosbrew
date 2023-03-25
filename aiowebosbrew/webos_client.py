@@ -226,24 +226,17 @@ class WebOsClient:
                 hosts = None
                 key = None
                 pub_key = None
-                try:
-                    if known_hosts:
-                        hosts = asyncssh.read_known_hosts(known_hosts)
-                except:
-                    raise WebOsTvPairError(f"Invalid known_hosts location {known_hosts}")
-
-                try:                
-                    if os.path.isfile(ssh_key):
-                        key = asyncssh.read_private_key(ssh_key)
-                    else:
-                        if not os.access(os.path.dirname(ssh_key), "w"):
-                            raise WebOsTvPairError(f"Invalid ssh key location {ssh_key}")
-                        key = asyncssh.generate_private_key("ssh-rsa")
-                        key.write_private_key(ssh_key, format_name="pkcs1-pem")
-                        pub_key = key.convert_to_public()
-                        pub.write_public_key(f"{ssh_key}.pub, format_name="pkcs1-pem")
-                except:
-                    raise WebOsTvPairError(f"Invalid ssh key location {ssh_key}")
+                if known_hosts:
+                    hosts = asyncssh.read_known_hosts(known_hosts)
+                if os.path.isfile(ssh_key):
+                    key = asyncssh.read_private_key(ssh_key)
+                else:
+                    if not os.access(os.path.dirname(ssh_key), "w"):
+                        raise WebOsTvPairError(f"Invalid ssh key location {ssh_key}")
+                    key = asyncssh.generate_private_key("ssh-rsa")
+                    key.write_private_key(ssh_key, format_name="pkcs1-pem")
+                    pub_key = key.convert_to_public()
+                    pub.write_public_key(f"{ssh_key}.pub, format_name="pkcs1-pem")
 
                 return hosts, key, pub_key
             ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
