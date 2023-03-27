@@ -254,7 +254,7 @@ class WebOsClient:
             ssh = await self._ssh_connect(ssh_key, known_hosts)
 
             handler_tasks.add(asyncio.create_task(ssh.wait_closed()))
-            self.ssh_connection = ssh
+            self.luna_connection = ssh
 
             # set static state and subscribe to state updates
             # avoid partial updates during initial subscription
