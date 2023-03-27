@@ -240,9 +240,13 @@ class WebOsClient:
 
                 return hosts, key, pub_key
             ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
-            known_hosts, ssh_key, pub_key = await ssh_future
-            if pub_key is not None:
-                _LOGGER.warning("ssh keygen(%s): generated private: %s, public: %s.pub", self.host, self.ssh_key_name, self.ssh_key_name)
+            try:
+                known_hosts, ssh_key, pub_key = await ssh_future
+            except:
+                raise WebOsTvPairError("Unable to read/generate ssh files")
+            else:
+                if pub_key is not None:
+                    _LOGGER.warning("ssh keygen(%s): generated private: %s, public: %s.pub", self.host, self.ssh_key_name, self.ssh_key_name)
             ssh = await self._ssh_connect(ssh_key, known_hosts)
 
             # set static state and subscribe to state updates
