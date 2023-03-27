@@ -248,18 +248,16 @@ class WebOsClient:
             #     return hosts, key, pub_key
             # ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
            
-            ssh_futures.add(
-                self._loop.run_in_executor(
-                    None, asyncssh.read_private_key, self.ssh_key_path
-                )
-            )  
+            ssh_futures["ssh_key"] = self._loop.run_in_executor(
+                None, asyncssh.read_private_key, self.ssh_key_path
+            ) 
             if self.known_hosts_path:
-                ssh_futures.add(
-                    self._loop.run_in_executor(
-                        None, asyncssh.read_known_hosts, self.known_hosts_path
-                    )
+                ssh_futures["known_hosts"] = self._loop.run_in_executor(
+                    None, asyncssh.read_known_hosts, self.known_hosts_path
                 )
-            await asyncio.wait(ssh_futures)
+            await asyncio.wait(ssh_futures.values())
+            key = ssh_futures.get("ssh_key")
+            hosts = ssh_futures.get("known_hosts")
 
             # try:
             #     known_hosts, ssh_key, pub_key = await ssh_future
