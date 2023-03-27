@@ -256,8 +256,9 @@ class WebOsClient:
                     None, asyncssh.read_known_hosts, self.known_hosts_path
                 )
             await asyncio.wait(ssh_futures.values())
-            key = ssh_futures.get("ssh_key")
-            hosts = ssh_futures.get("known_hosts")
+            key = ssh_futures["ssh_key"]
+            if fut := ssh_futures.get("known_hosts"):
+                hosts = fut.result()
 
             # try:
             #     known_hosts, ssh_key, pub_key = await ssh_future
