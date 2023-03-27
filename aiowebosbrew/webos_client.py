@@ -144,6 +144,8 @@ class WebOsClient:
         main_ws = None
         input_ws = None
         ssl_context = None
+
+        ssh_futures = set()
         ssh = None
         ssh_key = None
         known_hosts = None
@@ -245,7 +247,20 @@ class WebOsClient:
 
                 return hosts, key, pub_key
             ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
-            
+             
+            if self.known_hosts_path:
+                ssh_futures.add(
+                    self._loop.run_in_executor(
+                        None, asyncssh.read_known_hosts, self.known_hosts_path
+                    )
+                )
+            ssh_futures.add(
+                self._loop.run_in_executor(
+                    None, asyncssh.read_private_key, self.ssh_key_path
+                )
+            )
+            await asyncio.wait(ssh_futures)
+
             try:
                 known_hosts, ssh_key, pub_key = await ssh_future
             except Exception as ex:
