@@ -212,6 +212,7 @@ class WebOsClient:
             # open additional connection needed to send button commands
             # the url is dynamically generated and returned from the ep.INPUT_SOCKET
             # endpoint on the main connection
+
             sockres = await self.request(ep.INPUT_SOCKET)
             inputsockpath = sockres.get("socketPath")
             input_ws = await self._ws_connect(inputsockpath, ssl_context)
@@ -222,6 +223,7 @@ class WebOsClient:
             # open ssh connection needed to send luna commands
             # also ensures root access
             # connection not maintained since each command is it's own process
+
             def ssh_files(ssh_key, known_hosts=""):
                 hosts = None
                 key = None
@@ -240,6 +242,7 @@ class WebOsClient:
 
                 return hosts, key, pub_key
             ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
+            
             try:
                 known_hosts, ssh_key, pub_key = await ssh_future
             except:
@@ -248,6 +251,9 @@ class WebOsClient:
                 if pub_key is not None:
                     _LOGGER.warning("ssh keygen(%s): generated private: %s, public: %s.pub", self.host, self.ssh_key_name, self.ssh_key_name)
             ssh = await self._ssh_connect(ssh_key, known_hosts)
+
+            handler_tasks.add(asyncio.create_task(ssh.wait_closed())
+            self.ssh_connection = ssh
 
             # set static state and subscribe to state updates
             # avoid partial updates during initial subscription
@@ -308,6 +314,8 @@ class WebOsClient:
 
             self.connection = None
             self.input_connection = None
+
+            self.ssh_connection = None
 
             self.do_state_update = False
 
