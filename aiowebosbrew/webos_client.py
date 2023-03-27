@@ -14,6 +14,7 @@ from websockets.client import connect as ws_connect
 import asyncssh
 
 from . import endpoints as ep
+from . import luna_endpoints as luna_ep
 from .exceptions import (
     WebOsTvCommandError,
     WebOsTvPairError,
