@@ -1,0 +1,7 @@
+"""webOS TV internal Luna API endpoints"""
+SET_CONFIGS = "com.webos.service.config/setConfigs"
+SET_SYSTEM_SETTINGS = "com.webos.settingsservice/setSystemSettings"
+GET_SYSTEM_SETTINGS = "com.webos.settingsservice/getSystemSettings"
+TURN_ON_SCREEN_SAVER = "com.webos.service.tvpower/power/turnOnScreenSaver"
+SHOW_INPUT_PICKER = "com.webos.surfacemanager/showInputPicker"
+HOMEBREW_EXEC = "org.webosbrew.hbchannel.service/exec"
