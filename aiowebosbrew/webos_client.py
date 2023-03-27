@@ -28,6 +28,8 @@ SOUND_OUTPUTS_TO_DELAY_CONSECUTIVE_VOLUME_STEPS = {"external_arc"}
 WS_PORT = 3000
 WSS_PORT = 3001
 
+SSH_PASSWORD = "alpine"
+
 _LOGGER = logging.getLogger(__package__)
 
 
