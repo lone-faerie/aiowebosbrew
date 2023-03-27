@@ -235,7 +235,7 @@ class WebOsClient:
                     key = asyncssh.read_private_key(ssh_key)
                 else:
                     if not os.access(os.path.dirname(ssh_key), "w"):
-                        raise IOError
+                        raise IOError("Unable to write generated SSH keys")
                     key = asyncssh.generate_private_key("ssh-rsa")
                     key.write_private_key(ssh_key, format_name="pkcs1-pem")
                     pub_key = key.convert_to_public()
@@ -246,8 +246,8 @@ class WebOsClient:
             
             try:
                 known_hosts, ssh_key, pub_key = await ssh_future
-            except:
-                raise WebOsTvPairError("Unable to read/generate ssh files")
+            except Exception as e:
+                raise WebOsTvPairError from e
             else:
                 if pub_key is not None:
                     _LOGGER.warning("ssh keygen(%s): generated private: %s, public: %s.pub", self.host, self.ssh_key_name, self.ssh_key_name)
