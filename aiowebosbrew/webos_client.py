@@ -248,8 +248,8 @@ class WebOsClient:
             
             try:
                 known_hosts, ssh_key, pub_key = await ssh_future
-            except Exception as e:
-                raise WebOsTvPairError from e
+            except Exception as ex:
+                raise WebOsTvPairError from ex
             else:
                 if pub_key is not None:
                     _LOGGER.warning("ssh keygen(%s): generated private: %s, public: %s.pub", self.host, self.ssh_key_name, self.ssh_key_name)
