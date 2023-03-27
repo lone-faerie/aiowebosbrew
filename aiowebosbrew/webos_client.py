@@ -252,7 +252,7 @@ class WebOsClient:
                     _LOGGER.warning("ssh keygen(%s): generated private: %s, public: %s.pub", self.host, self.ssh_key_name, self.ssh_key_name)
             ssh = await self._ssh_connect(ssh_key, known_hosts)
 
-            handler_tasks.add(asyncio.create_task(ssh.wait_closed())
+            handler_tasks.add(asyncio.create_task(ssh.wait_closed()))
             self.ssh_connection = ssh
 
             # set static state and subscribe to state updates
