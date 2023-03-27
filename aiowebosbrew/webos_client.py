@@ -232,7 +232,7 @@ class WebOsClient:
                     key = asyncssh.read_private_key(ssh_key)
                 else:
                     if not os.access(os.path.dirname(ssh_key), "w"):
-                        raise WebOsTvPairError(f"Invalid ssh key location {ssh_key}")
+                        raise IOError
                     key = asyncssh.generate_private_key("ssh-rsa")
                     key.write_private_key(ssh_key, format_name="pkcs1-pem")
                     pub_key = key.convert_to_public()
