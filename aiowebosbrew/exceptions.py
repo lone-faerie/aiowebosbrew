@@ -9,6 +9,10 @@ class WebOsTvPairError(WebOsTvError):
     """Represent TV pairing errors."""
 
 
+class WebOsTvRootError(WebOsTvError):
+   """Represent TV root access errors."""
+
+
 class WebOsTvCommandError(WebOsTvError):
     """Represent TV command errors."""
 
