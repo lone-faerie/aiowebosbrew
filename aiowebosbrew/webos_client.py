@@ -247,9 +247,15 @@ class WebOsClient:
 
             luna_ssh = await self._ssh_connect(ssh_key, known_hosts)
 
-            _LOGGER.debug("ssh send(%s): check root", self.host)
-            raw_response = await luna_ssh.run(f'luna-send -n 1 "luna://{luna_ep.HOMEBREW_GET_CONFIG}" "{}"')
+            _LOGGER.debug("ssh run(%s): check root", self.host)
+            raw_response = await luna_ssh.run(f'luna-send -n 1 "luna://{luna_ep.HOMEBREW_GET_CONFIG}" "{{}}"')
             response = json.loads(raw_response.stdout)
+            _LOGGER.debug(
+                "check root(%s): root: %s, error: %s",
+                self.host,
+                response["root"],
+                response.get("errorText"),
+            )
 
             handler_tasks.add(asyncio.create_task(luna_ssh.wait_closed()))
             self.luna_connection = luna_ssh
