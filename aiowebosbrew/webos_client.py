@@ -247,8 +247,8 @@ class WebOsClient:
 
             luna_ssh = await self._ssh_connect(ssh_key, known_hosts)
 
-            _LOGGER.debug("ws send(%s): check root", self.host)
-            raw_response = await luna_ssh.run('luna-send -n 1 "luna://org.webosbrew.hbchannel.service/getConfiguration" "{}"')
+            _LOGGER.debug("ssh send(%s): check root", self.host)
+            raw_response = await luna_ssh.run(f'luna-send -n 1 "luna://{luna_ep.HOMEBREW_GET_CONFIG}" "{}"')
             response = json.loads(raw_response.stdout)
 
             handler_tasks.add(asyncio.create_task(luna_ssh.wait_closed()))
