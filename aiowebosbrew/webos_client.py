@@ -11,7 +11,11 @@ from datetime import timedelta
 import websockets
 from websockets.client import connect as ws_connect
 
-import asyncssh
+from asyncssh import (
+    connect as ssh_connect,
+    read_private_key,
+    read_known_hosts,
+)
 
 from . import endpoints as ep
 from . import luna_endpoints as luna_ep
@@ -128,7 +132,7 @@ class WebOsClient:
     async def _ssh_connect(self, ssh_key, known_hosts, port=()):
         """Create SSH connection."""
         _LOGGER.debug("ssh connect(%s): port: %d", self.host, port if port else 22)
-        return await asyncssh.connect(
+        return await ssh_connect(
             self.host,
             port,
             known_hosts=known_hosts,
@@ -228,32 +232,13 @@ class WebOsClient:
             # open ssh connection needed to send luna commands
             # also ensures root access
             # connection not maintained since each command is it's own process
-
-            # def ssh_files(ssh_key, known_hosts=""):
-            #     hosts = None
-            #     key = None
-            #     pub_key = None
-            #     if known_hosts:
-            #         hosts = asyncssh.read_known_hosts(known_hosts)
-            #     if os.path.isfile(ssh_key):
-            #         key = asyncssh.read_private_key(ssh_key)
-            #     else:
-            #         if not os.access(os.path.dirname(ssh_key), "w"):
-            #             raise IOError("Unable to write generated SSH keys")
-            #         key = asyncssh.generate_private_key("ssh-rsa")
-            #         key.write_private_key(ssh_key, format_name="pkcs1-pem")
-            #         pub_key = key.convert_to_public()
-            #         pub.write_public_key(f"{ssh_key}.pub", format_name="pkcs1-pem")
-            #
-            #     return hosts, key, pub_key
-            # ssh_future = self._loop.run_in_executor(None, ssh_files, self.ssh_key_path, self.known_hosts_path)
            
             ssh_futures["ssh_key"] = self._loop.run_in_executor(
-                None, asyncssh.read_private_key, self.ssh_key_path
+                None, read_private_key, self.ssh_key_path
             ) 
             if self.known_hosts_path:
                 ssh_futures["known_hosts"] = self._loop.run_in_executor(
-                    None, asyncssh.read_known_hosts, self.known_hosts_path
+                    None, read_known_hosts, self.known_hosts_path
                 )
             await asyncio.wait(ssh_futures.values())
             key = ssh_futures["ssh_key"]
