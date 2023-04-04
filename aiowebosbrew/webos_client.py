@@ -253,9 +253,13 @@ class WebOsClient:
             _LOGGER.debug(
                 "check root(%s): root: %s, error: %s",
                 self.host,
-                response["root"],
+                response.get("root"),
                 response.get("errorText"),
             )
+            if not response["returnValue"]:
+                raise WebOsTvCommandError(response.get("errorText", "Unkown error."))
+            if not response.get("root"):
+                raise WebOsTvCommandError("TV does not have root access.")
 
             handler_tasks.add(asyncio.create_task(luna_ssh.wait_closed()))
             self.luna_connection = luna_ssh
