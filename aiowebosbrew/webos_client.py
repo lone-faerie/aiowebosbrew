@@ -25,7 +25,7 @@ from .exceptions import (
     WebOsTvResponseTypeError,
     WebOsTvServiceNotFoundError,
 )
-from .handshake import REGISTRATION_MESSAGE
+from .handshake import REGISTRATION_MESSAGE, CHECK_ROOT_COMMAND
 
 SOUND_OUTPUTS_TO_DELAY_CONSECUTIVE_VOLUME_STEPS = {"external_arc"}
 
@@ -150,7 +150,7 @@ class WebOsClient:
         ssl_context = None
 
         ssh_futures = {}
-        ssh = None
+        luna_ssh = None
         ssh_key = None
         known_hosts = None
         try:
@@ -189,7 +189,7 @@ class WebOsClient:
                 and response["payload"]["pairingType"] == "PROMPT"
             ):
                 raw_response = await main_ws.recv()
-                _LOGGER.debug("recv(%s): pairing", self.host)
+                _LOGGER.debug("ws recv(%s): pairing", self.host)
                 response = json.loads(raw_response)
                 _LOGGER.debug(
                     "pairing(%s): type: %s, error: %s",
@@ -245,18 +245,14 @@ class WebOsClient:
             if fut := ssh_futures.get("known_hosts"):
                 hosts = fut.result()
 
-            # try:
-            #     known_hosts, ssh_key, pub_key = await ssh_future
-            # except Exception as ex:
-            #     raise WebOsTvPairError from ex
-            # else:
-            #     if pub_key is not None:
-            #         _LOGGER.warning("ssh keygen(%s): generated private: %s, public: %s.pub", self.host, self.ssh_key_name, self.ssh_key_name)
+            luna_ssh = await self._ssh_connect(ssh_key, known_hosts)
 
-            ssh = await self._ssh_connect(ssh_key, known_hosts)
+            _LOGGER.debug("ws send(%s): check root", self.host)
+            raw_response = await luna_ssh.run('luna-send -n 1 "luna://org.webosbrew.hbchannel.service/getConfiguration" "{}"')
+            response = json.loads(raw_response.stdout)
 
-            handler_tasks.add(asyncio.create_task(ssh.wait_closed()))
-            self.luna_connection = ssh
+            handler_tasks.add(asyncio.create_task(luna_ssh.wait_closed()))
+            self.luna_connection = luna_ssh
 
             # set static state and subscribe to state updates
             # avoid partial updates during initial subscription
