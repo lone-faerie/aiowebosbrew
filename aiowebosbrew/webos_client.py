@@ -702,6 +702,19 @@ class WebOsClient:
         _LOGGER.debug("send(%s): %s", self.host, message)
         await self.connection.send(json.dumps(message))
 
+
+    async def luna_command(self, request_type, uri, payload=None, uid=None):
+        if uid is None:
+            uid = self.command_count
+            self.command_count += 1
+
+        if payload is None:
+            payload = {}
+
+        cmd = ['luna-send', '-n', '1', uri, json.dumps(payload)]
+        return await asyncio.create_subprocess_shell()
+
+
     async def request(self, uri, payload=None, cmd_type="request", uid=None):
         """Send a request and wait for response."""
         if uid is None:
@@ -710,7 +723,10 @@ class WebOsClient:
         res = self._loop.create_future()
         self.futures[uid] = res
         try:
-            await self.command(cmd_type, uri, payload, uid)
+            if not cmd_type.startswith("luna"):
+                await self.command(cmd_type, uri, payload, uid)
+            else:
+                await self.luna_command(cmd_type, uri, payload, uid)
         except (asyncio.CancelledError, WebOsTvCommandError):
             del self.futures[uid]
             raise
@@ -740,14 +756,14 @@ class WebOsClient:
 
         return payload
 
-    async def subscribe(self, callback, uri, payload=None):
+    async def subscribe(self, callback, uri, payload=None, cmd_type="subscribe"):
         """Subscribe to updates."""
         uid = self.command_count
         self.command_count += 1
         self.callbacks[uid] = callback
         try:
             return await self.request(
-                uri, payload=payload, cmd_type="subscribe", uid=uid
+                uri, payload=payload, cmd_type=cmd_type, uid=uid
             )
         except Exception:
             del self.callbacks[uid]
@@ -1081,17 +1097,6 @@ class WebOsClient:
     async def fast_forward(self):
         """Fast Forward media."""
         return await self.request(ep.MEDIA_FAST_FORWARD)
-
-    async def luna_command(self, request_type, uri, payload=None, uid=None):
-        if uid is None:
-            uid = self.command_count
-            self.command_count += 1
-
-        if payload is None:
-            payload = {}
-
-        cmd = ['luna-send', '-n', '1', uri, json.dumps(payload)]
-        return await asyncio.create_subprocess_shell()
 
     async def luna_request(self, uri, params):
         """luna api call."""
