@@ -704,6 +704,7 @@ class WebOsClient:
 
 
     async def luna_command(self, request_type, uri, payload=None, uid=None):
+        """Build and send a luna command."""
         if uid is None:
             uid = self.command_count
             self.command_count += 1
@@ -722,11 +723,10 @@ class WebOsClient:
             self.command_count += 1
         res = self._loop.create_future()
         self.futures[uid] = res
+        is_luna = cmd_type.startswith("luna")
         try:
-            if not cmd_type.startswith("luna"):
-                await self.command(cmd_type, uri, payload, uid)
-            else:
-                await self.luna_command(cmd_type, uri, payload, uid)
+            cmd = self.luna_command if is_luna else self.command
+            await cmd(cmd_type, uri, payload, uid)
         except (asyncio.CancelledError, WebOsTvCommandError):
             del self.futures[uid]
             raise
