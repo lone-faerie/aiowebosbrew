@@ -83,6 +83,7 @@ class WebOsClient:
         self.known_hosts = None
         self.luna_connection = None
         self.luna_tasks = set()
+        self._consumer_queue = asyncio.Queue()
 
     async def connect(self):
         """Connect to webOS TV device."""
