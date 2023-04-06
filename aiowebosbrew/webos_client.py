@@ -82,7 +82,7 @@ class WebOsClient:
         self.known_hosts_path = known_hosts
         self.known_hosts = None
         self.luna_connection = None
-        self.consumer_queue = asyncio.Queue()
+        self.luna_tasks = set()
 
     async def connect(self):
         """Connect to webOS TV device."""
@@ -386,29 +386,29 @@ class WebOsClient:
         except asyncio.CancelledError:
             pass
 
-    async def consumer_handler(self, web_socket, callbacks, futures):
+    async def consumer_handler(self, aiter, callbacks, futures, uid=None):
         """Callbacks consumer handler."""
         callback_queues = {}
         callback_tasks = {}
 
         try:
-            async for raw_msg in web_socket:
+            async for raw_msg in aiter:
                 if callbacks or futures:
                     _LOGGER.debug("recv(%s): %s", self.host, raw_msg)
                     msg = json.loads(raw_msg)
-                    uid = msg.get("id")
-                    callback = self.callbacks.get(uid)
-                    future = self.futures.get(uid)
+                    _uid = msg.get("id", uid)
+                    callback = self.callbacks.get(_uid)
+                    future = self.futures.get(_uid)
                     if callback is not None:
-                        if uid not in callback_tasks:
+                        if _uid not in callback_tasks:
                             queue = asyncio.Queue()
-                            callback_queues[uid] = queue
-                            callback_tasks[uid] = asyncio.create_task(
+                            callback_queues[_uid] = queue
+                            callback_tasks[_uid] = asyncio.create_task(
                                 self.callback_handler(queue, callback, future)
                             )
-                        callback_queues[uid].put_nowait(msg)
+                        callback_queues[_uid].put_nowait(msg)
                     elif future is not None and not future.done():
-                        self.futures[uid].set_result(msg)
+                        self.futures[_uid].set_result(msg)
 
         except (
             asyncio.CancelledError,
