@@ -242,9 +242,9 @@ class WebOsClient:
                     None, read_known_hosts, self.known_hosts_path
                 )
             await asyncio.wait(ssh_futures.values())
-            key = ssh_futures["ssh_key"]
+            ssh_key = ssh_futures["ssh_key"].result()
             if fut := ssh_futures.get("known_hosts"):
-                hosts = fut.result()
+                known_hosts = fut.result()
 
             luna_ssh = await self._ssh_connect(ssh_key, known_hosts)
 
